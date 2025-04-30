@@ -5,5 +5,18 @@
             "street": "123 Main St",
             "city": "Anytown"
         }
+    },
+    "order": {
+        "id": "12345",
+        "items": [
+            {
+                "product": "Widget",
+                "quantity": 2
+            },
+            {
+                "product": "Gadget",
+                "quantity": 1
+            }
+        ]
     }
 }

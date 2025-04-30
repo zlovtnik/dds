@@ -1,6 +1,6 @@
 # Rust ETL Pipeline with PostgreSQL
 
-A robust Rust application that combines user management functionality with an ETL (Extract, Transform, Load) pipeline for processing JSON data into PostgreSQL.
+A robust Rust application that combines user management functionality with an ETL (Extract, Transform, Load) pipeline for processing JSON data into PostgreSQL, featuring a GraphQL API for real-time data access.
 
 ## Features
 
@@ -16,6 +16,16 @@ A robust Rust application that combines user management functionality with an ET
   - Dynamic table creation based on JSON schema
   - PostgreSQL data loading
   - Comprehensive error handling
+  - Real-time event notifications
+
+- **GraphQL API**
+  - Real-time data access
+  - Subscription support for ETL events
+  - Comprehensive query and mutation operations
+  - Interactive GraphiQL playground
+  - Job and task management
+  - Pipeline run monitoring
+  - ETL metrics and statistics
 
 ## Prerequisites
 
@@ -34,6 +44,10 @@ A robust Rust application that combines user management functionality with an ET
 - `serde_json`: JSON parsing
 - `anyhow`: Error handling
 - `thiserror`: Custom error types
+- `async-graphql`: GraphQL implementation
+- `async-graphql-axum`: Axum integration for GraphQL
+- `axum`: Web framework
+- `broadcast`: Event broadcasting
 
 ## Project Structure
 
@@ -42,6 +56,9 @@ A robust Rust application that combines user management functionality with an ET
 ├── src/
 │   ├── main.rs           # Application entry point
 │   ├── etl.rs            # ETL pipeline implementation
+│   ├── graphql/          # GraphQL implementation
+│   │   ├── mod.rs        # GraphQL schema and resolvers
+│   │   └── types.rs      # GraphQL types and models
 │   ├── models/
 │   │   ├── mod.rs
 │   │   └── user.rs       # User model definitions
@@ -69,6 +86,17 @@ A robust Rust application that combines user management functionality with an ET
    ```
 
 ## Usage
+
+### GraphQL API
+
+The application provides a GraphQL API at `http://0.0.0.0:4040/graphql` with an interactive playground available at `http://0.0.0.0:4040/graphiql`.
+
+Key GraphQL features:
+- Query jobs, tasks, and pipeline runs
+- Create and manage ETL jobs
+- Monitor job status and metrics
+- Subscribe to real-time ETL events
+- View ETL statistics and metrics
 
 ### User Management
 
@@ -109,6 +137,7 @@ The ETL pipeline will:
 - Flatten nested JSON structures
 - Create appropriate database tables
 - Load the data into PostgreSQL
+- Emit real-time events for monitoring
 
 Example JSON file:
 ```json

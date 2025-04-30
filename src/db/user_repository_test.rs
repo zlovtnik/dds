@@ -1,31 +1,26 @@
 use crate::db::DbConnection;
 use crate::models::user::{CreateUser, UpdateUser};
-use sqlx::sqlite::SqlitePoolOptions;
-use sqlx::Sqlite;
+use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
-async fn setup_test_db() -> DbConnection<Sqlite> {
-    let pool = SqlitePoolOptions::new()
+async fn setup_test_db() -> DbConnection<sqlx::Postgres> {
+    let pool = PgPoolOptions::new()
         .max_connections(1)
-        .connect(":memory:")
+        .connect("postgres://postgres:postgres@localhost:5432/test_db")
         .await
         .expect("Failed to create test database");
 
-    // Create users table
-    sqlx::query(
-        r#"
-        CREATE TABLE users (
-            id TEXT PRIMARY KEY,
-            username TEXT NOT NULL,
-            email TEXT NOT NULL,
-            created_at DATETIME NOT NULL,
-            updated_at DATETIME NOT NULL
-        )
-        "#,
-    )
-    .execute(&pool)
-    .await
-    .expect("Failed to create users table");
+    // Start a transaction
+    let mut tx = pool.begin().await.expect("Failed to start transaction");
+
+    // Clear the users table
+    let _ = sqlx::query("DELETE FROM users")
+        .execute(&mut *tx)
+        .await
+        .expect("Failed to clear users table");
+
+    // Commit the transaction
+    let _ = tx.commit().await.expect("Failed to commit transaction");
 
     DbConnection { pool }
 }
