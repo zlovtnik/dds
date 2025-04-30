@@ -43,7 +43,11 @@ impl DbConnection<Postgres> {
     /// let db = DbConnection::new().await?;
     /// ```
     pub async fn new() -> Result<Self, sqlx::Error> {
-        let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+        // Try to get the Supabase database URL first, fall back to DATABASE_URL
+        let database_url = env::var("SUPABASE_DB_URL")
+            .or_else(|_| env::var("DATABASE_URL"))
+            .expect("Neither SUPABASE_DB_URL nor DATABASE_URL is set");
+
         let pool = PgPoolOptions::new()
             .max_connections(5)
             .connect(&database_url)
