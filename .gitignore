@@ -1,0 +1,100 @@
+# Rust specific
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE specific
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+*.iml
+*.iws
+*.ipr
+.idea_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Database
+*.sqlite
+*.sqlite3
+.sqlx/
+*.db
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# Build output
+/dist/
+/build/
+/target/
+/debug/
+/release/
+
+# Dependencies
+/node_modules/
+/.pnp
+.pnp.js
+
+# Testing
+/coverage/
+*.profraw
+*.gcda
+*.gcno
+
+# Misc
+.DS_Store
+*.pem
+*.p12
+*.key
+*.crt
+*.cert
+*.orig
+*.bak
+*~
+
+# Project specific
+/data/json/*.json
+!data/json/example.json
+/data/
+!data/json/
+!data/json/example.json
+
+# Rust specific
+*.rlib
+*.dll
+*.so
+*.dylib
+*.exe
+*.pdb
+*.dSYM/
+*.su
+*.idb
+*.pdb
+*.ilk
+*.meta
+*.manifest
+*.rc
+*.res
+*.sbr
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.tmp_proj
+*.log
+*.vspscc
+*.vssscc
+*.builds
+*.pidb
+*.svclog
+*.scc
+*.user
+*.userosscache
+*.sln.docstates
