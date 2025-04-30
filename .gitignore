@@ -99,3 +99,4 @@ logs/
 *.user
 *.userosscache
 *.sln.docstates
+.vercel
