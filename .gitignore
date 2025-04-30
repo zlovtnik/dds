@@ -36,6 +36,7 @@ logs/
 /target/
 /debug/
 /release/
+/.target/
 
 # Dependencies
 /node_modules/

@@ -50,11 +50,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let router = create_router(schema);
 
     // Start the GraphQL server
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:4040").await?;
+    let port = std::env::var("PORT").unwrap_or_else(|_| "4040".to_string());
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     let server = serve(listener, router.into_make_service());
 
-    println!("GraphQL server running on http://0.0.0.0:4040");
-    println!("GraphiQL playground available at http://0.0.0.0:4040/graphiql");
+    println!("GraphQL server running on http://0.0.0.0:{}", port);
+    println!("GraphiQL playground available at http://0.0.0.0:{}", port);
 
     // Run the server in the background
     tokio::spawn(async move {
