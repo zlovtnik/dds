@@ -3,6 +3,14 @@ name = "dds"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "dds"
+path = "src/main.rs"
+
+[[bin]]
+name = "test_db"
+path = "test_db.rs"
+
 [dependencies]
 async-graphql = "7.0.16"
 async-graphql-axum = "7.0.16"
