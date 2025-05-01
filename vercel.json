@@ -3,7 +3,10 @@
     "builds": [
         {
             "src": "vercel-build.sh",
-            "use": "@vercel/static-build"
+            "use": "@vercel/static-build",
+            "config": {
+                "distDir": "dist"
+            }
         }
     ],
     "routes": [
@@ -24,12 +27,12 @@
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
         "PORT": "0",
-        "SQLX_OFFLINE": "false"
+        "SQLX_OFFLINE": "true"
     },
     "build": {
         "env": {
             "RUSTFLAGS": "-C target-cpu=native",
-            "SQLX_OFFLINE": "false"
+            "SQLX_OFFLINE": "true"
         }
     }
 }
