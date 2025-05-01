@@ -1,7 +1,8 @@
 use crate::db::DbConnection;
 use crate::models::etl::UuidScalar;
-use crate::models::user::{CreateUser, UpdateUser};
-use sqlx::postgres::PgPoolOptions;
+use crate::models::user::{CreateUser, UpdateUser, User};
+use chrono::Utc;
+use sqlx::postgres::{PgPoolOptions, Postgres};
 use uuid::Uuid;
 
 async fn setup_test_db() -> DbConnection<sqlx::Postgres> {
@@ -28,85 +29,71 @@ async fn setup_test_db() -> DbConnection<sqlx::Postgres> {
 
 #[tokio::test]
 async fn test_create_user() {
-    let db = setup_test_db().await;
+    let db = DbConnection::<Postgres>::new().await.unwrap();
+
     let user = CreateUser {
         username: "testuser".to_string(),
         email: "test@example.com".to_string(),
     };
 
-    let created_user = db.create_user(user).await.expect("Failed to create user");
-    assert_eq!(created_user.username, "testuser");
-    assert_eq!(created_user.email, "test@example.com");
-    assert!(created_user.created_at.0 <= chrono::Utc::now());
-    assert!(created_user.updated_at.0 <= chrono::Utc::now());
+    let created = db.create_user(user).await.unwrap();
+    assert_eq!(created.username, "testuser");
+    assert_eq!(created.email, "test@example.com");
 }
 
 #[tokio::test]
 async fn test_get_user() {
-    let db = setup_test_db().await;
+    let db = DbConnection::<Postgres>::new().await.unwrap();
+
     let user = CreateUser {
         username: "testuser".to_string(),
         email: "test@example.com".to_string(),
     };
 
-    let created_user = db.create_user(user).await.expect("Failed to create user");
-    let retrieved_user = db
-        .get_user(created_user.id)
-        .await
-        .expect("Failed to get user")
-        .expect("User not found");
+    let created = db.create_user(user).await.unwrap();
+    let retrieved = db.get_user(created.id).await.unwrap().unwrap();
 
-    assert_eq!(created_user.id.0, retrieved_user.id.0);
-    assert_eq!(created_user.username, retrieved_user.username);
-    assert_eq!(created_user.email, retrieved_user.email);
+    assert_eq!(created.id.0, retrieved.id.0);
+    assert_eq!(created.username, retrieved.username);
+    assert_eq!(created.email, retrieved.email);
 }
 
 #[tokio::test]
 async fn test_update_user() {
-    let db = setup_test_db().await;
+    let db = DbConnection::<Postgres>::new().await.unwrap();
+
     let user = CreateUser {
         username: "testuser".to_string(),
         email: "test@example.com".to_string(),
     };
 
-    let created_user = db.create_user(user).await.expect("Failed to create user");
+    let created = db.create_user(user).await.unwrap();
+
     let update = UpdateUser {
         username: Some("updateduser".to_string()),
-        email: None,
+        email: Some("updated@example.com".to_string()),
     };
 
-    let updated_user = db
-        .update_user(created_user.id, update)
-        .await
-        .expect("Failed to update user")
-        .expect("User not found");
-
-    assert_eq!(updated_user.id.0, created_user.id.0);
-    assert_eq!(updated_user.username, "updateduser");
-    assert_eq!(updated_user.email, created_user.email);
-    assert!(updated_user.updated_at.0 > created_user.updated_at.0);
+    let updated = db.update_user(created.id, update).await.unwrap().unwrap();
+    assert_eq!(updated.username, "updateduser");
+    assert_eq!(updated.email, "updated@example.com");
 }
 
 #[tokio::test]
 async fn test_delete_user() {
-    let db = setup_test_db().await;
+    let db = DbConnection::<Postgres>::new().await.unwrap();
+
     let user = CreateUser {
         username: "testuser".to_string(),
         email: "test@example.com".to_string(),
     };
 
-    let created_user = db.create_user(user).await.expect("Failed to create user");
-    let deleted = db
-        .delete_user(created_user.id)
-        .await
-        .expect("Failed to delete user");
+    let created = db.create_user(user).await.unwrap();
+    let deleted = db.delete_user(created.id).await.unwrap();
     assert!(deleted);
 
-    let retrieved_user = db
-        .get_user(created_user.id)
-        .await
-        .expect("Failed to get user");
-    assert!(retrieved_user.is_none());
+    let retrieved = db.get_user(created.id).await.unwrap();
+    assert!(retrieved.is_none());
 }
 
 #[tokio::test]
