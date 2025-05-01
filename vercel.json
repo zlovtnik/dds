@@ -3,16 +3,9 @@
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
-        "SQLX_OFFLINE": "true" // Correct for runtime only
-        // Vercel automatically provides PORT at runtime
-        // Add other RUNTIME environment variables here (like SUPABASE_URL, SUPABASE_KEY if needed by the app)
+        "SQLX_OFFLINE": "true"
     },
     "build": {
-        "env": {
-            // Let the build script handle SQLX_OFFLINE for build steps
-            // Add other BUILD-TIME environment variables here if needed (DATABASE_URL should be set in Vercel Project Settings)
-        }
+        "env": {}
     }
-    // No "builds" section needed - Vercel detects api/
-    // No "routes" section needed initially - Vercel maps api/index automatically
 }
