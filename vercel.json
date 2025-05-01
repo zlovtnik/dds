@@ -4,8 +4,7 @@
     "outputDirectory": "api",
     "functions": {
         "api/index": {
-            "runtime": "provided",
-            "maxDuration": 10
+            "runtime": "provided@1.0.0"
         }
     },
     "routes": [
