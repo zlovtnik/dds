@@ -6,6 +6,14 @@
         {
             "src": "/api/(.*)",
             "dest": "/api/index.sh"
+        },
+        {
+            "src": "/graphiql",
+            "dest": "/api/index.sh"
+        },
+        {
+            "src": "/graphql",
+            "dest": "/api/index.sh"
         }
     ],
     "env": {
