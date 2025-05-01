@@ -2,11 +2,6 @@
     "version": 2,
     "buildCommand": "./vercel-build.sh",
     "outputDirectory": "api",
-    "functions": {
-        "api/index.sh": {
-            "runtime": "provided@1.0.0"
-        }
-    },
     "routes": [
         {
             "src": "/api/(.*)",
