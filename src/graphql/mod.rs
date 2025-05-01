@@ -10,7 +10,7 @@ use tokio::sync::broadcast;
 use uuid::Uuid;
 
 use crate::models::etl::{Job, PipelineRun, Status, Task, UuidScalar};
-use crate::models::user::{CreateUser, UpdateUser, User};
+use crate::models::user::User;
 
 /// GraphQL context that holds the database pool and event sender
 pub struct GraphQLContext {

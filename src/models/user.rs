@@ -1,7 +1,5 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
-use uuid::Uuid;
 
 use crate::models::etl::{DateTimeScalar, UuidScalar};
 
