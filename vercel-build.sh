@@ -8,7 +8,7 @@ fi
 
 # Set environment variables for SQLx
 export DATABASE_URL="postgres://dummy:dummy@localhost:5432/dummy"
-export SQLX_OFFLINE=true
+export SQLX_OFFLINE=false
 
 # Build the Rust application
 cargo build --release
@@ -27,7 +27,7 @@ cat > .vercel/output/functions/main.func << EOF
     "launcherType": "bash",
     "environment": {
         "PORT": "0",
-        "SQLX_OFFLINE": "true",
+        "SQLX_OFFLINE": "false",
         "SUPABASE_URL": "\${SUPABASE_URL}",
         "SUPABASE_KEY": "\${SUPABASE_KEY}",
         "SUPABASE_DB_URL": "\${SUPABASE_DB_URL}"
