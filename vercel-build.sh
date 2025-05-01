@@ -53,21 +53,16 @@ echo "Building release binary (SQLX_OFFLINE=$SQLX_OFFLINE)..."
 cargo build --release --features api
 echo "Build complete."
 
-# --- Prepare Vercel Output ---
-# Create the standard Vercel API output directory
-OUTPUT_DIR="api"
-mkdir -p "$OUTPUT_DIR"
-echo "Created output directory: $OUTPUT_DIR"
-
-# Copy the compiled binary to the output directory
-cp target/release/dds "$OUTPUT_DIR/index"
-echo "Copied binary to $OUTPUT_DIR/index"
+# --- Prepare Vercel Output (at the root) ---
+# Copy the compiled binary to the root
+cp target/release/dds ./index
+echo "Copied binary to ./index"
 
 # Make the binary executable
-chmod +x "$OUTPUT_DIR/index"
+chmod +x ./index
 
-# Create a simple launcher script
-cat > "$OUTPUT_DIR/index.sh" << 'EOF'
+# Create a simple launcher script at the root
+cat > ./index.sh << 'EOF'
 #!/bin/bash
 cd "$(dirname "$0")"
 export RUST_LOG=info
@@ -78,6 +73,6 @@ exec ./index
 EOF
 
 # Make the launcher script executable
-chmod +x "$OUTPUT_DIR/index.sh"
+chmod +x ./index.sh
 
 echo "--- Vercel Rust Build Finished Successfully ---"

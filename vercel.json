@@ -1,16 +1,15 @@
 {
     "version": 2,
     "buildCommand": "./vercel-build.sh",
-    "outputDirectory": "api",
     "functions": {
-        "api/**/*.sh": {
+        "index.sh": {
             "runtime": "provided@1.0.0"
         }
     },
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index.sh"
+            "dest": "/index.sh"
         }
     ],
     "env": {
