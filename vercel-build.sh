@@ -7,7 +7,7 @@ if ! command -v rustc &> /dev/null; then
 fi
 
 # Set environment variables for SQLx
-export DATABASE_URL="postgres://dummy:dummy@localhost:5432/dummy"
+export DATABASE_URL="${SUPABASE_DB_URL}"
 export SQLX_OFFLINE=false
 
 # Prepare SQLx query cache
