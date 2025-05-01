@@ -3,14 +3,14 @@
     "buildCommand": "./vercel-build.sh",
     "outputDirectory": "api",
     "functions": {
-        "api/index": {
+        "api/index.sh": {
             "runtime": "provided@1.0.0"
         }
     },
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index"
+            "dest": "/api/index.sh"
         }
     ],
     "env": {

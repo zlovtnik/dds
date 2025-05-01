@@ -59,12 +59,24 @@ OUTPUT_DIR="api"
 mkdir -p "$OUTPUT_DIR"
 echo "Created output directory: $OUTPUT_DIR"
 
-# Copy the compiled binary to the output directory.
-# Rename to 'index' for '/api/' route, or specific name like 'dds' for '/api/dds' route.
+# Copy the compiled binary to the output directory
 cp target/release/dds "$OUTPUT_DIR/index"
 echo "Copied binary to $OUTPUT_DIR/index"
 
-# Make the binary executable (likely redundant, but safe)
+# Make the binary executable
 chmod +x "$OUTPUT_DIR/index"
+
+# Create a simple launcher script
+cat > "$OUTPUT_DIR/index.sh" << 'EOF'
+#!/bin/bash
+export RUST_LOG=info
+export RUST_BACKTRACE=1
+export PORT=${PORT:-3000}
+export SQLX_OFFLINE=false
+./index
+EOF
+
+# Make the launcher script executable
+chmod +x "$OUTPUT_DIR/index.sh"
 
 echo "--- Vercel Rust Build Finished Successfully ---"
