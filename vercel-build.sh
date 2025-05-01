@@ -8,9 +8,13 @@ fi
 
 # Set environment variables for SQLx
 export DATABASE_URL="postgres://dummy:dummy@localhost:5432/dummy"
-export SQLX_OFFLINE=true
+export SQLX_OFFLINE=false
 
-# Build the Rust application
+# Prepare SQLx query cache
+cargo sqlx prepare
+
+# Now build with offline mode
+export SQLX_OFFLINE=true
 cargo build --release
 
 # Create the output directory structure
