@@ -82,10 +82,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     pipeline.process_directory(data_dir).await?;
 
     // Start the GraphQL server
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let addr = format!("0.0.0.0:{}", port);
+    let listener = tokio::net::TcpListener::bind(&addr).await?;
     println!("Starting GraphQL server...");
-    println!("GraphQL server running on http://localhost:3000");
-    println!("GraphiQL playground available at http://localhost:3000/graphiql");
+    println!("GraphQL server running on http://localhost:{}", port);
+    println!(
+        "GraphiQL playground available at http://localhost:{}/graphiql",
+        port
+    );
     println!("Press Ctrl+C to stop the server");
 
     serve(listener, router).await?;
