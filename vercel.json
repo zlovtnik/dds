@@ -3,7 +3,7 @@
     "buildCommand": "./vercel-build.sh",
     "outputDirectory": "api",
     "functions": {
-        "api/index.sh": {
+        "api/**/*.sh": {
             "runtime": "provided@1.0.0"
         }
     },

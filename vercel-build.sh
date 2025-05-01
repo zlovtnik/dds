@@ -69,11 +69,12 @@ chmod +x "$OUTPUT_DIR/index"
 # Create a simple launcher script
 cat > "$OUTPUT_DIR/index.sh" << 'EOF'
 #!/bin/bash
+cd "$(dirname "$0")"
 export RUST_LOG=info
 export RUST_BACKTRACE=1
 export PORT=${PORT:-3000}
 export SQLX_OFFLINE=false
-./index
+exec ./index
 EOF
 
 # Make the launcher script executable
