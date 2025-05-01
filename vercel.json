@@ -1,11 +1,26 @@
 {
     "version": 2,
-    "buildCommand": "./vercel-build.sh",
-    "outputDirectory": "api",
+    "builds": [
+        {
+            "src": "Makefile",
+            "use": "@vercel/build-utils",
+            "config": {
+                "buildCommand": "make all"
+            }
+        }
+    ],
     "routes": [
         {
+            "src": "/graphql",
+            "dest": "/functions/dds"
+        },
+        {
+            "src": "/graphiql",
+            "dest": "/functions/dds"
+        },
+        {
             "src": "/(.*)",
-            "dest": "/api/index.sh"
+            "dest": "/static/$1"
         }
     ],
     "env": {
