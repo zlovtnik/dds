@@ -25,9 +25,9 @@ pub fn init_logging(log_dir: Option<PathBuf>) -> anyhow::Result<()> {
 
         // Create a rolling file appender
         let file_appender = tracing_appender::rolling::RollingFileAppender::new(
-            tracing_appender::rolling::RollingFileAppenderBuilder::new("app", &log_dir)
-                .rotation(tracing_appender::rolling::Rotation::DAILY)
-                .max_log_files(7),
+            tracing_appender::rolling::Rotation::DAILY,
+            "app",
+            &log_dir,
         );
 
         // Create a layer for file output
