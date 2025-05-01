@@ -45,12 +45,12 @@ set +x # Stop detailed command logging
 echo ">>> cargo sqlx prepare command finished <<<"
 echo "SQLx preparation complete."
 
-
 # --- Build ---
 # Set SQLX_OFFLINE=true for the final build
 export SQLX_OFFLINE=true
 echo "Building release binary (SQLX_OFFLINE=$SQLX_OFFLINE)..."
-cargo build --release
+# Build with release profile and API features
+cargo build --release --features api
 echo "Build complete."
 
 # --- Prepare Vercel Output ---
