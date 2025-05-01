@@ -1,5 +1,7 @@
 {
     "version": 2,
+    "buildCommand": "./vercel-build.sh",
+    "outputDirectory": "api",
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",

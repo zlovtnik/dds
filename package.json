@@ -3,10 +3,6 @@
     "version": "1.0.0",
     "private": true,
     "scripts": {
-        "build": "cargo build --release",
-        "start": "cargo run"
-    },
-    "engines": {
-        "node": ">=18.0.0"
+        "build": "./vercel-build.sh"
     }
 }
