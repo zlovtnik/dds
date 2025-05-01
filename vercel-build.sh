@@ -8,14 +8,24 @@ echo "--- Starting Vercel Rust Build ---"
 # Install Rust if not already installed
 if ! command -v rustc &> /dev/null; then
     echo "Installing Rust..."
-    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-    source $HOME/.cargo/env
+    # Use --no-modify-path as we will source manually
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+    # Source the cargo environment script manually to update PATH for this script session
+    source "$HOME/.cargo/env"
 else
     echo "Rust already installed."
+    # Ensure PATH includes cargo bin if Rust was already present (e.g., from cache)
+    # Adding it explicitly is safe even if already there.
+    export PATH="$HOME/.cargo/bin:$PATH"
 fi
 
 echo "Rust version: $(rustc --version)"
 echo "Cargo version: $(cargo --version)"
+
+# Install sqlx-cli
+echo "Installing sqlx-cli..."
+cargo install sqlx-cli
+echo "sqlx-cli installed."
 
 # --- SQLx Preparation ---
 # Ensure DATABASE_URL is set in Vercel Environment Variables
@@ -28,9 +38,9 @@ echo "DATABASE_URL is set."
 # Set SQLX_OFFLINE=false for preparation
 export SQLX_OFFLINE=false
 echo "Preparing SQLx (SQLX_OFFLINE=$SQLX_OFFLINE)..."
-# Consider adding --check to avoid full recompilation if possible,
-# but full prepare is safer in CI.
-cargo sqlx prepare --workspace -- --all-targets || cargo sqlx prepare # Try workspace first, fallback if not a workspace
+# Try workspace first, fallback if not a workspace
+# Use --quiet on prepare to reduce log noise if desired
+cargo sqlx prepare --workspace -- --all-targets || cargo sqlx prepare
 echo "SQLx preparation complete."
 
 # --- Build ---
@@ -47,17 +57,11 @@ mkdir -p "$OUTPUT_DIR"
 echo "Created output directory: $OUTPUT_DIR"
 
 # Copy the compiled binary to the output directory.
-# IMPORTANT: Rename the binary if you want a specific endpoint.
-# - 'index': Responds to requests at /api/
-# - 'my_function': Responds to requests at /api/my_function
-# We'll use 'index' here for the root API endpoint.
+# Rename to 'index' for '/api/' route, or specific name like 'dds' for '/api/dds' route.
 cp target/release/dds "$OUTPUT_DIR/index"
 echo "Copied binary to $OUTPUT_DIR/index"
 
-# Make the binary executable (redundant usually, but safe)
+# Make the binary executable (likely redundant, but safe)
 chmod +x "$OUTPUT_DIR/index"
 
 echo "--- Vercel Rust Build Finished Successfully ---"
-
-# No need for .func or launcher.sh with this approach
-# Vercel's 'provided' runtime will execute api/index directly.
