@@ -30,11 +30,19 @@ cat > dist/functions/main.func << EOF
     "handler": "dds",
     "launcherType": "bash",
     "environment": {
-        "PORT": "0",
+        "PORT": "\${PORT}",
         "SQLX_OFFLINE": "true",
         "SUPABASE_URL": "\${SUPABASE_URL}",
         "SUPABASE_KEY": "\${SUPABASE_KEY}",
         "SUPABASE_DB_URL": "\${SUPABASE_DB_URL}"
     }
 }
-EOF 
+EOF
+
+# Create a launcher script
+cat > dist/functions/launcher.sh << EOF
+#!/bin/bash
+./dds
+EOF
+
+chmod +x dist/functions/launcher.sh 
