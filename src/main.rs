@@ -51,35 +51,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = create_schema(db.pool.clone(), event_sender);
     let router = create_router(schema);
 
-    // Create a test user
-    let user = db
-        .create_user(CreateUser {
-            username: "test_user".to_string(),
-            email: "test@example.com".to_string(),
-        })
-        .await?;
-
-    // Fetch the user
-    let fetched_user = db.get_user(user.id).await?;
-    println!("Fetched user: {:?}", fetched_user);
-
-    // Update the user
-    let update = UpdateUser {
-        username: Some("updated_user".to_string()),
-        email: None,
-    };
-    let updated_user = db.update_user(user.id, update).await?;
-    println!("Updated user: {:?}", updated_user);
-
-    // Delete the user
-    let deleted = db.delete_user(user.id).await?;
-    println!("User deleted: {}", deleted);
-
-    // Create and run an ETL pipeline
-    let pipeline = ETLPipeline::new(db.pool.clone());
-    let data_dir = Path::new("data");
-    pipeline.process_directory(data_dir).await?;
-
     // Start the GraphQL server
     let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
     let addr = format!("0.0.0.0:{}", port);
