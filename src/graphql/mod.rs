@@ -10,6 +10,7 @@ use tokio::sync::broadcast;
 use uuid::Uuid;
 
 use crate::models::etl::{Job, PipelineRun, Status, Task, UuidScalar};
+use crate::models::user::{CreateUser, UpdateUser, User};
 
 /// GraphQL context that holds the database pool and event sender
 pub struct GraphQLContext {
@@ -127,6 +128,25 @@ impl Query {
             failed_tasks: task_stats.failed_tasks.unwrap_or(0) as i32,
             running_tasks: task_stats.running_tasks.unwrap_or(0) as i32,
         })
+    }
+
+    /// Get a user by ID
+    async fn user(&self, ctx: &Context<'_>, id: UuidScalar) -> async_graphql::Result<Option<User>> {
+        let pool = ctx.data::<GraphQLContext>()?.pool.clone();
+        let user = sqlx::query_as::<_, User>("SELECT * FROM public.users WHERE id = $1")
+            .bind(id.0)
+            .fetch_optional(&pool)
+            .await?;
+        Ok(user)
+    }
+
+    /// Get all users
+    async fn users(&self, ctx: &Context<'_>) -> async_graphql::Result<Vec<User>> {
+        let pool = ctx.data::<GraphQLContext>()?.pool.clone();
+        let users = sqlx::query_as::<_, User>("SELECT * FROM public.users")
+            .fetch_all(&pool)
+            .await?;
+        Ok(users)
     }
 }
 
@@ -378,6 +398,55 @@ impl Mutation {
 
         Ok(run)
     }
+
+    /// Create a new user
+    async fn create_user(
+        &self,
+        ctx: &Context<'_>,
+        username: String,
+        email: String,
+    ) -> async_graphql::Result<User> {
+        let pool = ctx.data::<GraphQLContext>()?.pool.clone();
+        let user = sqlx::query_as::<_, User>(
+            "INSERT INTO public.users (id, username, email, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *",
+        )
+        .bind(UuidScalar(uuid::Uuid::new_v4()))
+        .bind(username)
+        .bind(email)
+        .fetch_one(&pool)
+        .await?;
+        Ok(user)
+    }
+
+    /// Update an existing user
+    async fn update_user(
+        &self,
+        ctx: &Context<'_>,
+        id: UuidScalar,
+        username: Option<String>,
+        email: Option<String>,
+    ) -> async_graphql::Result<Option<User>> {
+        let pool = ctx.data::<GraphQLContext>()?.pool.clone();
+        let user = sqlx::query_as::<_, User>(
+            "UPDATE public.users SET username = COALESCE($1, username), email = COALESCE($2, email), updated_at = NOW() WHERE id = $3 RETURNING *",
+        )
+        .bind(username)
+        .bind(email)
+        .bind(id.0)
+        .fetch_optional(&pool)
+        .await?;
+        Ok(user)
+    }
+
+    /// Delete a user
+    async fn delete_user(&self, ctx: &Context<'_>, id: UuidScalar) -> async_graphql::Result<bool> {
+        let pool = ctx.data::<GraphQLContext>()?.pool.clone();
+        let result = sqlx::query("DELETE FROM public.users WHERE id = $1")
+            .bind(id.0)
+            .execute(&pool)
+            .await?;
+        Ok(result.rows_affected() > 0)
+    }
 }
 
 /// Root subscription type for GraphQL
@@ -436,4 +505,3 @@ async fn graphql_playground() -> impl axum::response::IntoResponse {
             .finish(),
     )
 }
-

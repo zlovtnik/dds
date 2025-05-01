@@ -12,6 +12,7 @@ use db::DbConnection;
 use dotenv::dotenv;
 use etl::{ETLPipeline, ETLPipelineError};
 use graphql::{create_router, create_schema};
+use models::etl::UuidScalar;
 use models::user::{CreateUser, UpdateUser};
 use std::path::Path;
 use tokio::sync::broadcast;
@@ -49,65 +50,43 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let schema = create_schema(db.pool.clone(), event_sender);
     let router = create_router(schema);
 
-    // Start the GraphQL server
-    let port = std::env::var("PORT").unwrap_or_else(|_| "4040".to_string());
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
-    let server = serve(listener, router.into_make_service());
+    // Create a test user
+    let user = db
+        .create_user(CreateUser {
+            username: "test_user".to_string(),
+            email: "test@example.com".to_string(),
+        })
+        .await?;
 
-    println!("GraphQL server running on http://0.0.0.0:{}", port);
-    println!("GraphiQL playground available at http://0.0.0.0:{}", port);
-
-    // Run the server in the background
-    tokio::spawn(async move {
-        if let Err(e) = server.await {
-            eprintln!("Server error: {}", e);
-        }
-    });
-
-    // Example usage of CRUD operations
-    let new_user = CreateUser {
-        username: "testuser".to_string(),
-        email: "test@example.com".to_string(),
-    };
-
-    // Create a user
-    let user = db.create_user(new_user).await?;
-    println!("Created user: {:?}", user);
-
-    // Get a user
+    // Fetch the user
     let fetched_user = db.get_user(user.id).await?;
     println!("Fetched user: {:?}", fetched_user);
 
-    // Update a user
+    // Update the user
     let update = UpdateUser {
-        username: Some("updateduser".to_string()),
+        username: Some("updated_user".to_string()),
         email: None,
     };
     let updated_user = db.update_user(user.id, update).await?;
     println!("Updated user: {:?}", updated_user);
 
-    // Delete a user
+    // Delete the user
     let deleted = db.delete_user(user.id).await?;
     println!("User deleted: {}", deleted);
 
-    // Example of ETL pipeline usage
-    let etl = ETLPipeline::new(db.pool);
-    let json_dir = Path::new("data/json");
+    // Create and run an ETL pipeline
+    let pipeline = ETLPipeline::new(db.pool.clone());
+    let data_dir = Path::new("data");
+    pipeline.process_directory(data_dir).await?;
 
-    // Process all JSON files in the directory
-    match etl.process_directory(json_dir).await {
-        Ok(_) => println!("ETL process completed successfully"),
-        Err(e) => match e {
-            ETLPipelineError::FileReadError(msg) => eprintln!("Error reading file: {}", msg),
-            ETLPipelineError::JsonParseError(msg) => eprintln!("Error parsing JSON: {}", msg),
-            ETLPipelineError::DatabaseError(e) => eprintln!("Database error: {}", e),
-            ETLPipelineError::DirectoryError(msg) => eprintln!("Directory error: {}", msg),
-        },
-    }
+    // Start the GraphQL server
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await?;
+    println!("Starting GraphQL server...");
+    println!("GraphQL server running on http://localhost:3000");
+    println!("GraphiQL playground available at http://localhost:3000/graphiql");
+    println!("Press Ctrl+C to stop the server");
 
-    // Keep the main thread alive
-    tokio::signal::ctrl_c().await?;
-    println!("Shutting down...");
+    serve(listener, router).await?;
 
     Ok(())
 }

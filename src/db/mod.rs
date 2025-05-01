@@ -5,6 +5,8 @@ use sqlx::{Database, Encode, Executor, Pool, Postgres, Type};
 use std::env;
 use uuid::Uuid;
 
+use crate::models::etl::UuidScalar;
+
 /// A generic database connection wrapper that provides a connection pool and common database operations.
 ///
 /// This struct is generic over the database type `DB` and provides type-safe database operations.
@@ -43,10 +45,17 @@ impl DbConnection<Postgres> {
     /// let db = DbConnection::new().await?;
     /// ```
     pub async fn new() -> Result<Self, sqlx::Error> {
+        println!("Environment variables:");
+        for (key, value) in env::vars() {
+            println!("{}: {}", key, value);
+        }
+
         // Try to get the Supabase database URL first, fall back to DATABASE_URL
         let database_url = env::var("SUPABASE_DB_URL")
             .or_else(|_| env::var("DATABASE_URL"))
             .expect("Neither SUPABASE_DB_URL nor DATABASE_URL is set");
+
+        println!("Using database URL: {}", database_url);
 
         let pool = PgPoolOptions::new()
             .max_connections(5)
@@ -59,42 +68,36 @@ impl DbConnection<Postgres> {
     /// Creates a new user in the database.
     ///
     /// # Arguments
-    /// * `user` - A `CreateUser` struct containing the user's information
+    /// * `user` - The user data to create
     ///
     /// # Returns
     /// * `Result<User, sqlx::Error>` - The created user or an error if creation fails
     ///
     /// # Example
     /// ```rust
-    /// let user = db.create_user(CreateUser {
-    ///     username: "john_doe".to_string(),
+    /// let user = CreateUser {
+    ///     username: "johndoe".to_string(),
     ///     email: "john@example.com".to_string(),
-    /// }).await?;
+    /// };
+    /// let created_user = db.create_user(user).await?;
     /// ```
     pub async fn create_user(&self, user: CreateUser) -> Result<User, sqlx::Error> {
-        let now = chrono::Utc::now();
-        let id = Uuid::new_v4();
+        let query = "INSERT INTO public.users (id, username, email, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *";
+        println!("Executing SQL query: {}", query);
+        let user = sqlx::query_as::<_, User>(query)
+            .bind(UuidScalar(Uuid::new_v4()))
+            .bind(user.username)
+            .bind(user.email)
+            .fetch_one(&self.pool)
+            .await?;
 
-        sqlx::query_as::<_, User>(
-            r#"
-            INSERT INTO users (id, username, email, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $5)
-            RETURNING *
-            "#,
-        )
-        .bind(id)
-        .bind(user.username)
-        .bind(user.email)
-        .bind(now)
-        .bind(now)
-        .fetch_one(&self.pool)
-        .await
+        Ok(user)
     }
 
     /// Retrieves a user from the database by their ID.
     ///
     /// # Arguments
-    /// * `id` - The UUID of the user to retrieve
+    /// * `id` - The ID of the user to retrieve
     ///
     /// # Returns
     /// * `Result<Option<User>, sqlx::Error>` - The user if found, None if not found, or an error
@@ -103,80 +106,67 @@ impl DbConnection<Postgres> {
     /// ```rust
     /// let user = db.get_user(user_id).await?;
     /// ```
-    pub async fn get_user(&self, id: Uuid) -> Result<Option<User>, sqlx::Error> {
-        sqlx::query_as::<_, User>(
-            r#"
-            SELECT * FROM users WHERE id = $1
-            "#,
-        )
-        .bind(id)
-        .fetch_optional(&self.pool)
-        .await
+    pub async fn get_user(&self, id: UuidScalar) -> Result<Option<User>, sqlx::Error> {
+        let query = "SELECT * FROM public.users WHERE id = $1";
+        println!("Executing SQL query: {}", query);
+        let user = sqlx::query_as::<_, User>(query)
+            .bind(id.0)
+            .fetch_optional(&self.pool)
+            .await?;
+
+        Ok(user)
     }
 
-    /// Updates an existing user in the database.
+    /// Updates a user in the database.
     ///
     /// # Arguments
-    /// * `id` - The UUID of the user to update
-    /// * `user` - An `UpdateUser` struct containing the fields to update
+    /// * `id` - The ID of the user to update
+    /// * `user` - The user data to update
     ///
     /// # Returns
-    /// * `Result<Option<User>, sqlx::Error>` - The updated user if found and updated, None if not found, or an error
+    /// * `Result<Option<User>, sqlx::Error>` - The updated user if found, None if not found, or an error
     ///
     /// # Example
     /// ```rust
-    /// let updated_user = db.update_user(user_id, UpdateUser {
-    ///     username: Some("new_username".to_string()),
+    /// let update = UpdateUser {
+    ///     username: Some("newusername".to_string()),
     ///     email: None,
-    /// }).await?;
+    /// };
+    /// let updated_user = db.update_user(user_id, update).await?;
     /// ```
     pub async fn update_user(
         &self,
-        id: Uuid,
+        id: UuidScalar,
         user: UpdateUser,
     ) -> Result<Option<User>, sqlx::Error> {
-        let now = chrono::Utc::now();
+        let query = "UPDATE public.users SET username = COALESCE($1, username), email = COALESCE($2, email), updated_at = NOW() WHERE id = $3 RETURNING *";
+        println!("Executing SQL query: {}", query);
+        let user = sqlx::query_as::<_, User>(query)
+            .bind(user.username)
+            .bind(user.email)
+            .bind(id.0)
+            .fetch_optional(&self.pool)
+            .await?;
 
-        sqlx::query_as::<_, User>(
-            r#"
-            UPDATE users
-            SET 
-                username = COALESCE($1, username),
-                email = COALESCE($2, email),
-                updated_at = $3
-            WHERE id = $4
-            RETURNING *
-            "#,
-        )
-        .bind(user.username)
-        .bind(user.email)
-        .bind(now)
-        .bind(id)
-        .fetch_optional(&self.pool)
-        .await
+        Ok(user)
     }
 
     /// Deletes a user from the database.
     ///
     /// # Arguments
-    /// * `id` - The UUID of the user to delete
+    /// * `id` - The ID of the user to delete
     ///
     /// # Returns
-    /// * `Result<bool, sqlx::Error>` - True if the user was deleted, false if not found, or an error
+    /// * `Result<bool, sqlx::Error>` - True if the user was deleted, False if not found, or an error
     ///
     /// # Example
     /// ```rust
     /// let deleted = db.delete_user(user_id).await?;
     /// ```
-    pub async fn delete_user(&self, id: Uuid) -> Result<bool, sqlx::Error> {
-        let result = sqlx::query(
-            r#"
-            DELETE FROM users WHERE id = $1
-            "#,
-        )
-        .bind(id)
-        .execute(&self.pool)
-        .await?;
+    pub async fn delete_user(&self, id: UuidScalar) -> Result<bool, sqlx::Error> {
+        let query = "DELETE FROM public.users WHERE id = $1";
+        println!("Executing SQL query: {}", query);
+        let result = sqlx::query(query).bind(id.0).execute(&self.pool).await?;
 
         Ok(result.rows_affected() > 0)
     }
