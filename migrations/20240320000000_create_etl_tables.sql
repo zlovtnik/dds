@@ -1,9 +1,3 @@
--- Drop existing tables and types if they exist
-DROP TABLE IF EXISTS pipeline_runs CASCADE;
-DROP TABLE IF EXISTS tasks CASCADE;
-DROP TABLE IF EXISTS jobs CASCADE;
-DROP TYPE IF EXISTS status CASCADE;
-
 -- Create the status enum type
 CREATE TYPE status AS ENUM ('Pending', 'Running', 'Completed', 'Failed');
 

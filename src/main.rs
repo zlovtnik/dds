@@ -10,6 +10,7 @@ mod models;
 use axum::serve;
 use db::DbConnection;
 use dotenv::dotenv;
+use env_logger;
 use etl::{ETLPipeline, ETLPipelineError};
 use graphql::{create_router, create_schema};
 use models::etl::UuidScalar;
@@ -38,6 +39,7 @@ use tokio::sync::broadcast;
 /// ```
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
     dotenv().ok();
 
     // Initialize database connection
