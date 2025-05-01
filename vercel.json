@@ -29,7 +29,7 @@
     "build": {
         "env": {
             "RUSTFLAGS": "-C target-cpu=native",
-            "SQLX_OFFLINE": "true"
+            "SQLX_OFFLINE": "false"
         }
     }
 }
