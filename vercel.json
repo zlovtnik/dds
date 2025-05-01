@@ -1,38 +1,18 @@
 {
     "version": 2,
-    "builds": [
-        {
-            "src": "vercel-build.sh",
-            "use": "@vercel/static-build",
-            "config": {
-                "distDir": "dist"
-            }
-        }
-    ],
-    "routes": [
-        {
-            "src": "/graphiql",
-            "dest": "/functions/main"
-        },
-        {
-            "src": "/graphql",
-            "dest": "/functions/main"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/functions/main"
-        }
-    ],
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
-        "PORT": "0",
-        "SQLX_OFFLINE": "true"
+        "SQLX_OFFLINE": "true" // Correct for runtime only
+        // Vercel automatically provides PORT at runtime
+        // Add other RUNTIME environment variables here (like SUPABASE_URL, SUPABASE_KEY if needed by the app)
     },
     "build": {
         "env": {
-            "RUSTFLAGS": "-C target-cpu=native",
-            "SQLX_OFFLINE": "true"
+            // Let the build script handle SQLX_OFFLINE for build steps
+            // Add other BUILD-TIME environment variables here if needed (DATABASE_URL should be set in Vercel Project Settings)
         }
     }
+    // No "builds" section needed - Vercel detects api/
+    // No "routes" section needed initially - Vercel maps api/index automatically
 }
