@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "build.sh",
+            "use": "@vercel/static-build"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/graphiql",
+            "dest": "target/release/dds"
+        },
+        {
+            "src": "/graphql",
+            "dest": "target/release/dds"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "target/release/dds"
+        }
+    ],
+    "env": {
+        "RUST_BACKTRACE": "1",
+        "RUST_LOG": "info",
+        "PORT": "3000",
+        "SQLX_OFFLINE": "false"
+    },
+    "build": {
+        "env": {
+            "RUSTFLAGS": "-C target-cpu=native",
+            "SQLX_OFFLINE": "false"
+        }
+    }
+}
