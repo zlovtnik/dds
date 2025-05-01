@@ -16,8 +16,8 @@ Cargo.lock
 
 # Environment variables
 .env
-.env.local
-.env.*.local
+.env.*
+!.env.example
 
 # Database
 *.sqlite
@@ -100,3 +100,6 @@ logs/
 *.userosscache
 *.sln.docstates
 .vercel
+
+# OS files
+Thumbs.db
