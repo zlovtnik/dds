@@ -4,22 +4,14 @@
     "outputDirectory": "api",
     "routes": [
         {
-            "src": "/api/(.*)",
-            "dest": "/api/index.sh"
-        },
-        {
-            "src": "/graphiql",
-            "dest": "/api/index.sh"
-        },
-        {
-            "src": "/graphql",
+            "src": "/(.*)",
             "dest": "/api/index.sh"
         }
     ],
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
-        "SQLX_OFFLINE": "true"
+        "SQLX_OFFLINE": "false"
     },
     "build": {
         "env": {}
