@@ -11,8 +11,7 @@
     "routes": [
         {
             "src": "/api/(.*)",
-            "dest": "/api/index",
-            "graphiql": "/graphql"
+            "dest": "/api/index"
         }
     ],
     "env": {
