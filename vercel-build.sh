@@ -38,10 +38,13 @@ echo "DATABASE_URL is set."
 # Set SQLX_OFFLINE=false for preparation
 export SQLX_OFFLINE=false
 echo "Preparing SQLx (SQLX_OFFLINE=$SQLX_OFFLINE)..."
-# Try workspace first, fallback if not a workspace
-# Use --quiet on prepare to reduce log noise if desired
+echo ">>> Running cargo sqlx prepare command <<<"
+set -x # Start detailed command logging just before the potentially slow command
 cargo sqlx prepare --workspace -- --all-targets || cargo sqlx prepare
+set +x # Stop detailed command logging
+echo ">>> cargo sqlx prepare command finished <<<"
 echo "SQLx preparation complete."
+
 
 # --- Build ---
 # Set SQLX_OFFLINE=true for the final build
