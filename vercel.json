@@ -2,6 +2,18 @@
     "version": 2,
     "buildCommand": "./vercel-build.sh",
     "outputDirectory": "api",
+    "functions": {
+        "api/index": {
+            "runtime": "provided",
+            "maxDuration": 10
+        }
+    },
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/index"
+        }
+    ],
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
