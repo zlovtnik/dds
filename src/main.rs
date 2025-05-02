@@ -11,11 +11,9 @@ mod models;
 use axum::serve;
 use db::DbConnection;
 use dotenv::dotenv;
-use etl::ETLPipeline;
 use graphql::{create_router, create_schema};
 use logging::{init_logging, LogLevel};
-use models::user::{CreateUser, UpdateUser};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use tokio::sync::broadcast;
 
 /// The main entry point of the application.

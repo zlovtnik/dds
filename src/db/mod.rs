@@ -41,8 +41,14 @@ impl DbConnection<Postgres> {
     /// * If the `DATABASE_URL` environment variable is not set
     ///
     /// # Example
-    /// ```rust
-    /// let db = DbConnection::new().await?;
+    /// ```no_run
+    /// use dds::db::DbConnection;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db = DbConnection::new().await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn new() -> Result<Self, sqlx::Error> {
         println!("Environment variables:");
@@ -74,12 +80,20 @@ impl DbConnection<Postgres> {
     /// * `Result<User, sqlx::Error>` - The created user or an error if creation fails
     ///
     /// # Example
-    /// ```rust
-    /// let user = CreateUser {
-    ///     username: "johndoe".to_string(),
-    ///     email: "john@example.com".to_string(),
-    /// };
-    /// let created_user = db.create_user(user).await?;
+    /// ```no_run
+    /// use dds::db::DbConnection;
+    /// use dds::models::user::CreateUser;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db = DbConnection::new().await?;
+    ///     let user = CreateUser {
+    ///         username: "johndoe".to_string(),
+    ///         email: "john@example.com".to_string(),
+    ///     };
+    ///     let created_user = db.create_user(user).await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn create_user(&self, user: CreateUser) -> Result<User, sqlx::Error> {
         let query = "INSERT INTO public.users (id, username, email, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING *";
@@ -103,8 +117,18 @@ impl DbConnection<Postgres> {
     /// * `Result<Option<User>, sqlx::Error>` - The user if found, None if not found, or an error
     ///
     /// # Example
-    /// ```rust
-    /// let user = db.get_user(user_id).await?;
+    /// ```no_run
+    /// use dds::db::DbConnection;
+    /// use dds::models::etl::UuidScalar;
+    /// use uuid::Uuid;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db = DbConnection::new().await?;
+    ///     let user_id = UuidScalar(Uuid::new_v4());
+    ///     let user = db.get_user(user_id).await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn get_user(&self, id: UuidScalar) -> Result<Option<User>, sqlx::Error> {
         let query = "SELECT * FROM public.users WHERE id = $1";
@@ -127,12 +151,23 @@ impl DbConnection<Postgres> {
     /// * `Result<Option<User>, sqlx::Error>` - The updated user if found, None if not found, or an error
     ///
     /// # Example
-    /// ```rust
-    /// let update = UpdateUser {
-    ///     username: Some("newusername".to_string()),
-    ///     email: None,
-    /// };
-    /// let updated_user = db.update_user(user_id, update).await?;
+    /// ```no_run
+    /// use dds::db::DbConnection;
+    /// use dds::models::user::UpdateUser;
+    /// use dds::models::etl::UuidScalar;
+    /// use uuid::Uuid;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db = DbConnection::new().await?;
+    ///     let user_id = UuidScalar(Uuid::new_v4());
+    ///     let update = UpdateUser {
+    ///         username: Some("newusername".to_string()),
+    ///         email: None,
+    ///     };
+    ///     let updated_user = db.update_user(user_id, update).await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn update_user(
         &self,
@@ -160,8 +195,18 @@ impl DbConnection<Postgres> {
     /// * `Result<bool, sqlx::Error>` - True if the user was deleted, False if not found, or an error
     ///
     /// # Example
-    /// ```rust
-    /// let deleted = db.delete_user(user_id).await?;
+    /// ```no_run
+    /// use dds::db::DbConnection;
+    /// use dds::models::etl::UuidScalar;
+    /// use uuid::Uuid;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let db = DbConnection::new().await?;
+    ///     let user_id = UuidScalar(Uuid::new_v4());
+    ///     let deleted = db.delete_user(user_id).await?;
+    ///     Ok(())
+    /// }
     /// ```
     pub async fn delete_user(&self, id: UuidScalar) -> Result<bool, sqlx::Error> {
         let query = "DELETE FROM public.users WHERE id = $1";

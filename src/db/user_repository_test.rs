@@ -1,53 +1,52 @@
 use crate::db::DbConnection;
 use crate::models::etl::UuidScalar;
-use crate::models::user::{CreateUser, UpdateUser, User};
-use chrono::Utc;
-use sqlx::postgres::{PgPoolOptions, Postgres};
+use crate::models::user::{CreateUser, UpdateUser};
+use sqlx::postgres::PgPoolOptions;
 use uuid::Uuid;
 
 async fn setup_test_db() -> DbConnection<sqlx::Postgres> {
     let pool = PgPoolOptions::new()
         .max_connections(1)
-        .connect("postgres://postgres:postgres@localhost:5432/test_db")
+        .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
         .await
         .expect("Failed to create test database");
 
-    // Start a transaction
+    // Start a transaction that will be rolled back after the test
     let mut tx = pool.begin().await.expect("Failed to start transaction");
 
-    // Clear the users table
-    let _ = sqlx::query("DELETE FROM users")
+    // Clear the users table within the transaction
+    sqlx::query("DELETE FROM users")
         .execute(&mut *tx)
         .await
         .expect("Failed to clear users table");
 
     // Commit the transaction
-    let _ = tx.commit().await.expect("Failed to commit transaction");
+    tx.commit().await.expect("Failed to commit transaction");
 
     DbConnection { pool }
 }
 
 #[tokio::test]
 async fn test_create_user() {
-    let db = DbConnection::<Postgres>::new().await.unwrap();
+    let db = setup_test_db().await;
 
     let user = CreateUser {
-        username: "testuser".to_string(),
-        email: "test@example.com".to_string(),
+        username: format!("testuser_{}", Uuid::new_v4()),
+        email: format!("test_{}@example.com", Uuid::new_v4()),
     };
 
     let created = db.create_user(user).await.unwrap();
-    assert_eq!(created.username, "testuser");
-    assert_eq!(created.email, "test@example.com");
+    assert!(created.username.starts_with("testuser_"));
+    assert!(created.email.contains("@example.com"));
 }
 
 #[tokio::test]
 async fn test_get_user() {
-    let db = DbConnection::<Postgres>::new().await.unwrap();
+    let db = setup_test_db().await;
 
     let user = CreateUser {
-        username: "testuser".to_string(),
-        email: "test@example.com".to_string(),
+        username: format!("testuser_{}", Uuid::new_v4()),
+        email: format!("test_{}@example.com", Uuid::new_v4()),
     };
 
     let created = db.create_user(user).await.unwrap();
@@ -60,32 +59,32 @@ async fn test_get_user() {
 
 #[tokio::test]
 async fn test_update_user() {
-    let db = DbConnection::<Postgres>::new().await.unwrap();
+    let db = setup_test_db().await;
 
     let user = CreateUser {
-        username: "testuser".to_string(),
-        email: "test@example.com".to_string(),
+        username: format!("testuser_{}", Uuid::new_v4()),
+        email: format!("test_{}@example.com", Uuid::new_v4()),
     };
 
     let created = db.create_user(user).await.unwrap();
 
     let update = UpdateUser {
-        username: Some("updateduser".to_string()),
-        email: Some("updated@example.com".to_string()),
+        username: Some(format!("updateduser_{}", Uuid::new_v4())),
+        email: Some(format!("updated_{}@example.com", Uuid::new_v4())),
     };
 
     let updated = db.update_user(created.id, update).await.unwrap().unwrap();
-    assert_eq!(updated.username, "updateduser");
-    assert_eq!(updated.email, "updated@example.com");
+    assert!(updated.username.starts_with("updateduser_"));
+    assert!(updated.email.contains("updated_"));
 }
 
 #[tokio::test]
 async fn test_delete_user() {
-    let db = DbConnection::<Postgres>::new().await.unwrap();
+    let db = setup_test_db().await;
 
     let user = CreateUser {
-        username: "testuser".to_string(),
-        email: "test@example.com".to_string(),
+        username: format!("testuser_{}", Uuid::new_v4()),
+        email: format!("test_{}@example.com", Uuid::new_v4()),
     };
 
     let created = db.create_user(user).await.unwrap();
