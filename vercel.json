@@ -3,7 +3,11 @@
     "builds": [
         {
             "src": "api/**/*.rs",
-            "use": "vercel-rust@4.0.8"
+            "use": "vercel-rust@4.0.8",
+            "config": {
+                "distDir": "api",
+                "buildCommand": "HOME=/root cargo build --release"
+            }
         },
         {
             "src": "public/**",
@@ -13,11 +17,11 @@
     "routes": [
         {
             "src": "/graphql",
-            "dest": "/api/graphql.rs"
+            "dest": "/api/graphql"
         },
         {
             "src": "/graphiql",
-            "dest": "/api/graphql.rs"
+            "dest": "/api/graphql"
         },
         {
             "src": "/(.*)",
@@ -27,6 +31,7 @@
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
-        "SQLX_OFFLINE": "false"
+        "SQLX_OFFLINE": "true",
+        "HOME": "/root"
     }
 }

@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use tracing::{Level, Subscriber};
+use tracing;
 use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{
     filter::EnvFilter,
