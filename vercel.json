@@ -3,11 +3,7 @@
     "builds": [
         {
             "src": "api/**/*.rs",
-            "use": "vercel-rust@4.0.8",
-            "config": {
-                "binary": "graphql",
-                "distDir": "api"
-            }
+            "use": "vercel-rust@3.0.0"
         },
         {
             "src": "public/**",
