@@ -6,7 +6,7 @@
             "use": "vercel-rust@4.0.8",
             "config": {
                 "distDir": "api",
-                "buildCommand": "HOME=/root cargo build --release"
+                "buildCommand": "CARGO_TARGET_DIR=/vercel/output/target cargo build --bin graphql --release"
             }
         },
         {
@@ -32,6 +32,6 @@
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
         "SQLX_OFFLINE": "true",
-        "HOME": "/root"
+        "CARGO_TARGET_DIR": "/vercel/output/target"
     }
 }

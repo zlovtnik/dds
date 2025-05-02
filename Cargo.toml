@@ -4,16 +4,16 @@ version = "0.1.0"
 edition = "2021"
 
 [[bin]]
+name = "graphql"
+path = "api/graphql.rs"
+
+[[bin]]
 name = "dds"
 path = "src/main.rs"
 
 [[bin]]
 name = "test_db"
 path = "test_db.rs"
-
-[[bin]]
-name = "graphql"
-path = "api/graphql.rs"
 
 [dependencies]
 async-graphql = "7.0.16"

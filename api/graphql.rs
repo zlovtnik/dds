@@ -1,5 +1,5 @@
 use async_graphql::http::GraphiQLSource;
-use serde_json::json;
+use serde_json;
 use std::io::{Error as IoError, ErrorKind};
 use tokio::sync::broadcast;
 use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
