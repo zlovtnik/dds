@@ -5,8 +5,8 @@
             "src": "api/**/*.rs",
             "use": "vercel-rust@4.0.8",
             "config": {
-                "distDir": "api",
-                "buildCommand": "RUSTUP_HOME=/root/.rustup CARGO_HOME=/root/.cargo /root/.cargo/bin/cargo build --bin graphql --release --target-dir=/vercel/output/target"
+                "binary": "graphql",
+                "distDir": "api"
             }
         },
         {
@@ -31,8 +31,6 @@
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
-        "SQLX_OFFLINE": "true",
-        "RUSTUP_HOME": "/root/.rustup",
-        "CARGO_HOME": "/root/.cargo"
+        "SQLX_OFFLINE": "true"
     }
 }
