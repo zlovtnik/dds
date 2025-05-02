@@ -11,6 +11,10 @@ path = "src/main.rs"
 name = "test_db"
 path = "test_db.rs"
 
+[[bin]]
+name = "graphql"
+path = "api/graphql.rs"
+
 [dependencies]
 async-graphql = "7.0.16"
 async-graphql-axum = "7.0.16"
@@ -30,3 +34,4 @@ anyhow = "1.0.98"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tracing-appender = "0.2"
+vercel_runtime = "1.0.0"

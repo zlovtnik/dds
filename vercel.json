@@ -2,33 +2,31 @@
     "version": 2,
     "builds": [
         {
-            "src": "Makefile",
-            "use": "@vercel/build-utils",
-            "config": {
-                "buildCommand": "make all"
-            }
+            "src": "api/**/*.rs",
+            "use": "vercel-rust@4.0.8"
+        },
+        {
+            "src": "public/**",
+            "use": "@vercel/static"
         }
     ],
     "routes": [
         {
             "src": "/graphql",
-            "dest": "/functions/dds"
+            "dest": "/api/graphql.rs"
         },
         {
             "src": "/graphiql",
-            "dest": "/functions/dds"
+            "dest": "/api/graphql.rs"
         },
         {
             "src": "/(.*)",
-            "dest": "/static/$1"
+            "dest": "/public/$1"
         }
     ],
     "env": {
         "RUST_BACKTRACE": "1",
         "RUST_LOG": "info",
         "SQLX_OFFLINE": "false"
-    },
-    "build": {
-        "env": {}
     }
 }
