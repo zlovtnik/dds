@@ -32,6 +32,8 @@ A robust Rust application that combines user management functionality with an ET
 - Rust (latest stable version)
 - PostgreSQL database
 - Cargo (Rust's package manager)
+- Docker (optional, for containerized deployment)
+- Make (optional, for using the Makefile)
 
 ## Dependencies
 
@@ -66,6 +68,10 @@ A robust Rust application that combines user management functionality with an ET
 │       ├── mod.rs        # Database connection and operations
 │       └── user_repository_test.rs
 ├── migrations/           # Database migrations
+├── Dockerfile           # Docker configuration
+├── Makefile             # Build and run shortcuts
+├── .github/
+│   └── workflows/        # GitHub Actions workflows
 └── Cargo.toml           # Project dependencies
 ```
 
@@ -78,12 +84,59 @@ A robust Rust application that combines user management functionality with an ET
    ```
 3. Run database migrations:
    ```bash
+   make migrate-up
+   ```
+   or
+   ```bash
    sqlx migrate run
    ```
 4. Build the project:
    ```bash
-   cargo build
+   make build
    ```
+   or
+   ```bash
+   cargo build --release --bin dds
+   ```
+
+## Using the Makefile
+
+This project includes a Makefile to simplify common operations:
+
+```bash
+# Build the application
+make build
+
+# Run the application
+make run
+
+# Run tests
+make test
+
+# Build Docker image
+make docker-build
+
+# Run Docker container
+make docker-run
+
+# Run database migrations
+make migrate-up
+
+# Run in development mode
+make dev
+```
+
+Run `make help` to see all available commands.
+
+## Continuous Integration
+
+This project uses GitHub Actions for continuous integration and deployment. The workflow includes:
+
+- Building the Rust application
+- Running tests
+- Building a Docker image (on merge to main)
+
+The workflow configuration is located in `.github/workflows/rust.yml`.
 
 ## Usage
 

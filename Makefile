@@ -1,70 +1,45 @@
-# Rust binary name
-BINARY_NAME = dds
-# Build directory
-BUILD_DIR = build
-# Target directory
-TARGET_DIR = target/release
-# Vercel output directory
-VERCEL_OUTPUT = .vercel/output
+.PHONY: build run test clean docker-build docker-run migrate-up dev help
 
-.PHONY: all clean build prepare-vercel
+# Default target
+help:
+	@echo "Available targets:"
+	@echo "  build         - Build the application in release mode"
+	@echo "  run           - Run the application"
+	@echo "  test          - Run tests"
+	@echo "  clean         - Clean build artifacts"
+	@echo "  docker-build  - Build Docker image"
+	@echo "  docker-run    - Run application in Docker container"
+	@echo "  migrate-up    - Run database migrations"
+	@echo "  dev           - Run in development mode with auto-reload"
 
-all: build prepare-vercel
-
-# Clean build artifacts
-clean:
-	@echo "Cleaning build artifacts..."
-	@rm -rf $(BUILD_DIR)
-	@rm -rf $(VERCEL_OUTPUT)
-	@cargo clean
-
-# Build the Rust project with optimizations
+# Build the application
 build:
-	@echo "Building Rust project with optimizations..."
-	@RUSTFLAGS="-C opt-level=3 -C target-cpu=native" cargo build --release
+	cargo build --release --bin dds
 
-# Prepare artifacts for Vercel
-prepare-vercel: build
-	@echo "Preparing Vercel artifacts..."
-	@mkdir -p $(VERCEL_OUTPUT)/static
-	@mkdir -p $(VERCEL_OUTPUT)/functions
-	@cp $(TARGET_DIR)/$(BINARY_NAME) $(VERCEL_OUTPUT)/functions/
-	@cp -r public/* $(VERCEL_OUTPUT)/static/ 2>/dev/null || true
-
-# Development build
-dev:
-	@echo "Building development version..."
-	@cargo build
+# Run the application
+run:
+	cargo run --bin dds
 
 # Run tests
 test:
-	@echo "Running tests..."
-	@cargo test
+	cargo test
 
-# Format code
-fmt:
-	@echo "Formatting code..."
-	@cargo fmt
+# Clean build artifacts
+clean:
+	cargo clean
 
-# Check code
-check:
-	@echo "Checking code..."
-	@cargo check
+# Build Docker image
+docker-build:
+	docker build -t dds:latest .
 
-# Install dependencies
-deps:
-	@echo "Installing dependencies..."
-	@cargo build
+# Run Docker container
+docker-run:
+	docker run -p 3000:3000 --env-file .env dds:latest
 
-# Help command
-help:
-	@echo "Available commands:"
-	@echo "  make all          - Build and prepare for Vercel"
-	@echo "  make build        - Build the Rust project with optimizations"
-	@echo "  make clean        - Clean build artifacts"
-	@echo "  make dev          - Build development version"
-	@echo "  make test         - Run tests"
-	@echo "  make fmt          - Format code"
-	@echo "  make check        - Check code"
-	@echo "  make deps         - Install dependencies"
-	@echo "  make prepare-vercel - Prepare artifacts for Vercel deployment" 
+# Run database migrations
+migrate-up:
+	sqlx migrate run
+
+# Run in development mode
+dev:
+	RUST_LOG=debug cargo run --bin dds 
