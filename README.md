@@ -77,7 +77,7 @@ A robust Rust application that combines user management functionality with an ET
 
 ## Setup
 
-1. Clone the repository
+1. Clone the reposit
 2. Create a `.env` file with your database configuration:
    ```
    DATABASE_URL=postgres://username:password@localhost:5432/database_name

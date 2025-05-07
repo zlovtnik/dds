@@ -1,29 +1,21 @@
-use sqlx::postgres::PgPoolOptions;
-use std::env;
+use dds::db::DbConnection;
+use dotenv::dotenv;
+use sqlx::Row;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Try to get the Supabase database URL first, fall back to DATABASE_URL
-    let database_url = env::var("SUPABASE_DB_URL")
-        .or_else(|_| env::var("DATABASE_URL"))
-        .expect("Neither SUPABASE_DB_URL nor DATABASE_URL is set");
+    // Load environment variables
+    dotenv().ok();
 
-    println!("Attempting to connect to database...");
-    println!("Using connection string: {}", database_url);
+    // Initialize database connection
+    let db = DbConnection::new().await?;
+    println!("Database connection established");
 
-    let pool = PgPoolOptions::new()
-        .max_connections(5)
-        .connect(&database_url)
-        .await?;
+    // Test query to check that the database is working
+    let result = sqlx::query("SELECT 1 as test").fetch_one(&db.pool).await?;
+    let test_value: i32 = result.try_get("test")?;
 
-    println!("Successfully connected to database!");
-
-    // Test a simple query using query_scalar instead of query!
-    let version: String = sqlx::query_scalar("SELECT version()")
-        .fetch_one(&pool)
-        .await?;
-
-    println!("Database version: {}", version);
+    println!("Database test query result: {}", test_value);
 
     Ok(())
 }

@@ -6,9 +6,11 @@ use axum::{
     Router,
 };
 use sqlx::PgPool;
+use std::sync::Arc;
 use tokio::sync::broadcast;
 use uuid::Uuid;
 
+use crate::auth::{Auth0Okta, AuthProvider, AuthResponse};
 use crate::models::etl::{Job, PipelineRun, Status, Task, UuidScalar};
 use crate::models::user::User;
 
@@ -16,6 +18,8 @@ use crate::models::user::User;
 pub struct GraphQLContext {
     pub pool: PgPool,
     pub event_sender: broadcast::Sender<ETLEvent>,
+    pub auth_provider: Arc<dyn AuthProvider>,
+    pub current_user_id: Option<UuidScalar>,
 }
 
 /// Events that can be emitted during ETL operations
@@ -447,6 +451,17 @@ impl Mutation {
             .await?;
         Ok(result.rows_affected() > 0)
     }
+
+    /// Login with Auth0/Okta credentials
+    async fn login(
+        &self,
+        ctx: &Context<'_>,
+        email: String,
+        password: String,
+    ) -> async_graphql::Result<AuthResponse> {
+        let auth_provider = &ctx.data::<GraphQLContext>()?.auth_provider;
+        auth_provider.login(email, password).await
+    }
 }
 
 /// Root subscription type for GraphQL
@@ -475,8 +490,16 @@ pub fn create_schema(
     pool: PgPool,
     event_sender: broadcast::Sender<ETLEvent>,
 ) -> Schema<Query, Mutation, Subscription> {
+    // Initialize Auth0/Okta provider
+    let auth_provider = Arc::new(Auth0Okta::new()) as Arc<dyn AuthProvider>;
+
     Schema::build(Query, Mutation, Subscription)
-        .data(GraphQLContext { pool, event_sender })
+        .data(GraphQLContext {
+            pool,
+            event_sender,
+            auth_provider,
+            current_user_id: None,
+        })
         .finish()
 }
 
@@ -493,7 +516,23 @@ async fn graphql_handler(
     Extension(schema): Extension<Schema<Query, Mutation, Subscription>>,
     req: GraphQLRequest,
 ) -> GraphQLResponse {
-    let response = schema.execute(req.into_inner()).await;
+    // Convert the request to an async-graphql request
+    let graphql_req = req.into_inner();
+
+    // Log the incoming request
+    if let Ok(request_json) = serde_json::to_string(&graphql_req) {
+        tracing::debug!("Received GraphQL request: {}", request_json);
+    }
+
+    // Execute the request
+    let response = schema.execute(graphql_req).await;
+
+    // Log any errors
+    if !response.errors.is_empty() {
+        tracing::error!("GraphQL errors: {:?}", response.errors);
+    }
+
+    // Return the response
     GraphQLResponse::from(response)
 }
 

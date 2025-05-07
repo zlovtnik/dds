@@ -1,3 +1,4 @@
+pub mod auth;
 pub mod db;
 pub mod etl;
 pub mod graphql;

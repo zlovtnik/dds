@@ -15,11 +15,15 @@ path = "src/main.rs"
 name = "test_db"
 path = "test_db.rs"
 
+[[bin]]
+name = "simple_server"
+path = "src/simple_server.rs"
+
 [dependencies]
 async-graphql = "7.0.16"
 async-graphql-axum = "7.0.16"
 async-stream = "0.3"
-axum = "0.8.4" # Ensure a single version is used
+axum = { version = "0.8.4", features = ["macros"] }
 chrono = { version = "0.4", features = ["serde"] }
 dotenv = "0.15"
 env_logger = "0.11"
@@ -34,6 +38,12 @@ anyhow = "1.0.98"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
 tracing-appender = "0.2"
+tower-http = { version = "0.5.0", features = ["fs", "trace"] }
+reqwest = { version = "0.11", features = ["json"] }
+jsonwebtoken = "8.3"
+oauth2 = "4.4"
+async-trait = "0.1"
+axum-extra = { version = "0.8", features = ["cookie"] }
 
 [lib]
 name = "dds"
