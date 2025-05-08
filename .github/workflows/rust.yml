@@ -41,6 +41,8 @@ jobs:
       
     - name: Run tests
       run: cargo test --verbose
+      env:
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
   
   docker:
     needs: build
