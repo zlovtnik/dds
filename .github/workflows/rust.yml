@@ -8,6 +8,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # Add DATABASE_URL with a placeholder value for sqlx prepare
+  SQLX_OFFLINE: true
 
 jobs:
   build:
@@ -21,6 +23,9 @@ jobs:
         profile: minimal
         toolchain: stable
         override: true
+    
+    - name: Install sqlx-cli
+      run: cargo install sqlx-cli --no-default-features --features postgres
     
     - name: Cache dependencies
       uses: actions/cache@v3
